@@ -7,7 +7,7 @@ import httpx
 
 app = FastAPI(title="Motor de Búsqueda - Firma Digital")
 
-# CORREGIDO PARA PRODUCCIÓN: Permite que tu frontend web en la nube se conecte sin bloqueos de seguridad
+# PERMITE CONEXIONES DESDE CUALQUIER FRONTEND WEB EN LA NUBE
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Lee de forma segura la API Key desde el servidor de Render (Generación Gemini 3)
+# CONFIGURACIÓN SEGURA DE LA API KEY (GENERACIÓN GEMINI 3)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_URL = f"https://googleapis.com{GEMINI_API_KEY}"
 
@@ -48,23 +48,27 @@ async def call_gemini_with_retry(user_prompt: str) -> str:
         for attempt in range(attempts):
             try:
                 response = await client.post(GEMINI_URL, json=payload, timeout=30.0)
+                
                 if response.status_code == 200:
                     data = response.json()
-                    return data["candidates"][0]["content"]["parts"][0]["text"]
+                    return data["candidates"]["content"]["parts"]["text"]
                 
-                # Gestión de reintentos por errores de tasa límite de llamadas o caídas (429/503)
+                # CORREGIDO: Sintaxis limpia para reintentos en errores 429 (Saturación) y 503 (Servicio caído)
                 if response.status_code in:
                     if attempt < attempts - 1:
                         await asyncio.sleep(delay)
                         delay *= 2
                         continue
+                
                 raise HTTPException(status_code=response.status_code, detail="Error en la API de Gemini.")
+                
             except (httpx.ConnectError, httpx.TimeoutException):
                 if attempt < attempts - 1:
                     await asyncio.sleep(delay)
                     delay *= 2
                     continue
                 raise HTTPException(status_code=503, detail="Error de conexión persistente.")
+                
         raise HTTPException(status_code=504, detail="Tiempo de espera agotado.")
 
 @app.post("/api/buscar")
