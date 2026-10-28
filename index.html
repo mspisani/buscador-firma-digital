@@ -121,8 +121,8 @@
 </div>
 
 <script>
-    // DIRECCIÓN GLOBAL ASIGNADA EN TU PANEL DE RENDER DE FORMA DIRECTA
-    const BACKEND_URL = "https://buscador-firma-digital.onrender.com";
+    // URL DE PRODUCCIÓN DE TU SERVIDOR EN RENDER
+    const BACKEND_URL = "https://onrender.com";
 
     async function enviarConsulta() {
         const inputEl = document.getElementById('userInput');
@@ -135,7 +135,7 @@
         inputEl.disabled = true;
         btnEl.disabled = true;
         btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el motor (el primer inicio puede demorar unos segundos por suspensión)...</span>';
+        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el motor de firma digital en la nube...</span>';
         
         try {
             const response = await fetch(`${BACKEND_URL}/api/buscar`, {
@@ -147,7 +147,7 @@
             });
             
             if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor local.');
+                throw new Error('Error en la respuesta del servidor.');
             }
             
             const data = await response.json();
