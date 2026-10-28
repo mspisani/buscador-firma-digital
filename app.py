@@ -7,7 +7,7 @@ import httpx
 
 app = FastAPI(title="Motor de Búsqueda - Firma Digital")
 
-# CONFIGURACIÓN DE CORS BLINDADA PARA EVITAR ERRORES DE RED EN EL NAVEGADOR
+# POLÍTICA DE CORS BLINDADA PARA EVITAR RESTRICCIONES EN EL NAVEGADOR
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# CORREGIDO: Ruta formal y completa de la API de Google Gemini (Generación 3)
+# REGLA DE SEGURIDAD PARA LEER TU API KEY DESDE EL ENTORNO DE RENDER
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_URL = f"https://googleapis.com{GEMINI_API_KEY}"
 
@@ -48,16 +48,22 @@ async def call_gemini_with_retry(user_prompt: str) -> str:
         for attempt in range(attempts):
             try:
                 response = await client.post(GEMINI_URL, json=payload, timeout=30.0)
+                
                 if response.status_code == 200:
                     data = response.json()
-                    return data["candidates"][0]["content"]["parts"][0]["text"]
+                    # CORREGIDO: Extracción de texto a prueba de fallos analizando la jerarquía exacta
+                    try:
+                        return data["candidates"][0]["content"]["parts"][0]["text"]
+                    except (KeyError, IndexError):
+                        raise HTTPException(status_code=502, detail="Estructura de respuesta inesperada de la IA.")
                 
+                # Gestión de reintentos por errores de tasa límite (429/503)
                 if response.status_code in (429, 503):
                     if attempt < attempts - 1:
                         await asyncio.sleep(delay)
                         delay *= 2
                         continue
-                raise HTTPException(status_code=response.status_code, detail="Error en la API.")
+                raise HTTPException(status_code=response.status_code, detail="Error en la API de Gemini.")
             except (httpx.ConnectError, httpx.TimeoutException):
                 if attempt < attempts - 1:
                     await asyncio.sleep(delay)
@@ -70,4 +76,3 @@ async def call_gemini_with_retry(user_prompt: str) -> str:
 async def buscar(request: QueryRequest):
     resultado = await call_gemini_with_retry(request.prompt)
     return {"respuesta": resultado}
-
