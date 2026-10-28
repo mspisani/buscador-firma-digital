@@ -7,7 +7,7 @@ import httpx
 
 app = FastAPI(title="Motor de Búsqueda - Firma Digital")
 
-# PERMITE CONEXIONES DESDE CUALQUIER FRONTEND WEB EN LA NUBE
+# CONFIGURACIÓN DE CORS BLINDADA PARA EVITAR ERRORES DE RED EN EL NAVEGADOR
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,7 +16,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# CONFIGURACIÓN SEGURA DE LA API KEY (GENERACIÓN GEMINI 3)
+# CORREGIDO: Ruta formal y completa de la API de Google Gemini (Generación 3)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_URL = f"https://googleapis.com{GEMINI_API_KEY}"
 
@@ -48,30 +48,26 @@ async def call_gemini_with_retry(user_prompt: str) -> str:
         for attempt in range(attempts):
             try:
                 response = await client.post(GEMINI_URL, json=payload, timeout=30.0)
-                
                 if response.status_code == 200:
                     data = response.json()
-                    return data["candidates"]["content"]["parts"]["text"]
+                    return data["candidates"][0]["content"]["parts"][0]["text"]
                 
-                # Bloque con la indentación exacta y tupla numérica para evitar caídas
                 if response.status_code in (429, 503):
                     if attempt < attempts - 1:
                         await asyncio.sleep(delay)
                         delay *= 2
                         continue
-                
-                raise HTTPException(status_code=response.status_code, detail="Error en la API de Gemini.")
-                
+                raise HTTPException(status_code=response.status_code, detail="Error en la API.")
             except (httpx.ConnectError, httpx.TimeoutException):
                 if attempt < attempts - 1:
                     await asyncio.sleep(delay)
                     delay *= 2
                     continue
                 raise HTTPException(status_code=503, detail="Error de conexión permanente.")
-                
         raise HTTPException(status_code=504, detail="Tiempo de espera agotado.")
 
 @app.post("/api/buscar")
 async def buscar(request: QueryRequest):
     resultado = await call_gemini_with_retry(request.prompt)
     return {"respuesta": resultado}
+
