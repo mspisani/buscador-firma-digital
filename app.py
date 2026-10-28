@@ -22,7 +22,7 @@ GEMINI_URL = f"https://googleapis.com{GEMINI_API_KEY}"
 
 SYSTEM_PROMPT = (
     "Sos un asistente técnico ultra conciso optimizado exclusivamente para Firma Digital, Certificados y Tokens USB "
-    "(ePass2003, mToken criptoID, SafeNet, Athena) in Argentina. "
+    "(ePass2003, mToken criptoID, SafeNet, Athena) en Argentina. "
     "REGLAS OBLIGATORIAS DE RESPUESTA:\n"
     "1. Estructura: Sé directo. Usa subtítulos y diagramas de flujo lineales con emojis (ej: 🔌 -> 📥 -> ⚙️).\n"
     "2. Jerarquía de Enlaces: Priorizá e invitá siempre a descargar desde los canales oficiales del Estado Nacional "
@@ -51,9 +51,9 @@ async def call_gemini_with_retry(user_prompt: str) -> str:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    return data["candidates"]["content"]["parts"][0]["text"]
+                    return data["candidates"]["content"]["parts"]["text"]
                 
-                # CORREGIDO: Bloque con la indentación exacta y tupla numérica para evitar caídas
+                # Bloque con la indentación exacta y tupla numérica para evitar caídas
                 if response.status_code in (429, 503):
                     if attempt < attempts - 1:
                         await asyncio.sleep(delay)
