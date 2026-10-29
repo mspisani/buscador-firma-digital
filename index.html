@@ -3,98 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador Especializado - Firma Digital</title>
+    <title>Asistente Conversacional - Firma Digital Argentina</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root { --primary: #0052cc; --primary-hover: #003d99; --bg-gradient: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-gradient); color: #1e293b; min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center; align-items: flex-start; }
-        .container { width: 100%; max-width: 800px; background: #ffffff; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
-        .header { text-align: center; margin-bottom: 28px; }
-        h1 { font-size: 26px; font-weight: 700; color: #0f172a; }
-        p.subtitle { font-size: 14px; color: #64748b; margin-top: 6px; }
-        .search-box { display: flex; gap: 12px; margin-bottom: 20px; }
-        input[type="text"] { flex: 1; padding: 14px 18px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 15px; outline: none; }
-        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.12); }
-        button.btn-search { padding: 14px 28px; background-color: var(--primary); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
-        button.btn-search:hover { background-color: var(--primary-hover); }
-        .quick-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; align-items: center; }
-        .quick-tags span { font-size: 12px; font-weight: 600; color: #64748b; }
-        .tag { background-color: #f1f5f9; color: #334155; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-gradient); color: #1e293b; min-height: 100vh; padding: 20px; display: flex; justify-content: center; align-items: center; }
+        .container { width: 100%; max-width: 850px; height: 90vh; background: #ffffff; display: flex; flex-direction: column; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.8); }
+        
+        .header { padding: 20px 25px; background: #ffffff; border-bottom: 1px solid #e2e8f0; text-align: center; }
+        .header h1 { font-size: 20px; font-weight: 700; color: #0f172a; }
+        .header p { font-size: 13px; color: #64748b; margin-top: 4px; }
+
+        .chat-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #f8fafc; }
+        
+        .message { max-width: 85%; padding: 14px 18px; border-radius: 14px; line-height: 1.6; font-size: 14px; word-break: break-word; }
+        .message.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .message.assistant { background: white; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .message.assistant h2, .message.assistant h3 { font-size: 15px; margin-top: 10px; margin-bottom: 6px; color: #0f172a; }
+        .message.assistant ul, .message.assistant ol { padding-left: 20px; margin-bottom: 8px; }
+        .message.assistant a { color: var(--primary); font-weight: 600; text-decoration: none; }
+        .message.assistant a:hover { text-decoration: underline; }
+
+        .quick-tags { padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 8px; background: #ffffff; border-top: 1px solid #e2e8f0; align-items: center; }
+        .quick-tags span { font-size: 11px; font-weight: 600; color: #64748b; }
+        .tag { background-color: #f1f5f9; color: #334155; padding: 5px 10px; border-radius: 15px; font-size: 11px; cursor: pointer; border: 1px solid #e2e8f0; }
         .tag:hover { background-color: #e2e8f0; color: var(--primary); }
-        .resultado-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 5px solid var(--primary); padding: 24px; border-radius: 10px; min-height: 120px; line-height: 1.7; font-size: 15px; }
-        .status { color: #64748b; font-style: italic; }
-        .spinner { width: 16px; height: 16px; border: 2px solid #ffffff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 0.8s linear infinite; }
-        .spinner-dark { border-color: var(--primary); border-bottom-color: transparent; }
+
+        .input-box { padding: 15px 20px; background: #ffffff; display: flex; gap: 10px; border-top: 1px solid #e2e8f0; }
+        input[type="text"] { flex: 1; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; }
+        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1); }
+        button { padding: 12px 24px; background-color: var(--primary); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: var(--primary-hover); }
+        button:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        
+        .spinner { width: 14px; height: 14px; border: 2px solid #ffffff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 0.8s linear infinite; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+
 <div class="container">
     <div class="header">
-        <h1>🔑 Asistente de Firma Digital Argentina</h1>
-        <p class="subtitle">Guías rápidas para configuración de Tokens USB y certificados.</p>
+        <h1>💬 Asistente Conversacional - Firma Digital Argentina</h1>
+        <p>Haceme cualquier pregunta sobre tokens, certificados o configuraciones en vivo.</p>
     </div>
-    <div class="search-box">
-        <input type="text" id="userInput" placeholder="Ej: ¿Cómo instalo el token ePass2003 en Windows?..." onkeydown="if(event.key === 'Enter') enviarConsulta()">
-        <button id="sendBtn" class="btn-search" onclick="enviarConsulta()">Buscar</button>
+
+    <div id="chatContainer" class="chat-container">
+        <div class="message assistant">
+            ¡Hola! 👋 Soy tu asistente especializado en Firma Digital. ¿En qué te puedo ayudar hoy o sobre qué paso querés que profundicemos?
+        </div>
     </div>
+
     <div class="quick-tags">
-        <span>Frecuentes:</span>
-        <div class="tag" onclick="usarSugerencia('Instalar ePass2003 en Windows')">🔌 Driver ePass2003</div>
-        <div class="tag" onclick="usarSugerencia('Descargar drivers mToken CriptoID')">📥 mToken CriptoID</div>
-        <div class="tag" onclick="usarSugerencia('Como importar certificados ONTI')">📜 Certificados ONTI</div>
+        <span>Sugerencias:</span>
+        <div class="tag" onclick="usarSugerencia('¿Cómo instalo el driver del ePass2003?')">🔌 Driver ePass2003</div>
+        <div class="tag" onclick="usarSugerencia('Explícame cómo firmar un PDF paso a paso')">📄 Firmar PDF</div>
+        <div class="tag" onclick="usarSugerencia('¿Qué hago si mi token no es reconocido?')">⚠️ Token no reconocido</div>
     </div>
-    <div id="output" class="resultado-box">
-        <span class="status">Escribí tu consulta arriba o elegí una opción rápida para comenzar.</span>
+
+    <div class="input-box">
+        <input type="text" id="userInput" placeholder="Escribe tu consulta o respuesta aquí..." onkeydown="if(event.key === 'Enter') enviarMensaje()">
+        <button id="sendBtn" onclick="enviarMensaje()">Enviar</button>
     </div>
 </div>
 
 <script>
     const BACKEND_URL = "https://buscador-firma-digital.onrender.com";
+    let chatHistory = []; // Almacena la memoria de la conversación
 
     function usarSugerencia(texto) {
         document.getElementById('userInput').value = texto;
-        enviarConsulta();
+        enviarMensaje();
     }
 
-    async function enviarConsulta() {
+    async function enviarMensaje() {
         const inputEl = document.getElementById('userInput');
-        const outputEl = document.getElementById('output');
-        const btnEl = document.getElementById('sendBtn');
-        const query = inputEl.value.trim();
-        if (!query) return;
+        const chatContainer = document.getElementById('chatContainer');
+        const sendBtn = document.getElementById('sendBtn');
+        const texto = inputEl.value.trim();
+
+        if (!texto) return;
+
+        // 1. Mostrar mensaje del usuario en la burbuja de chat
+        chatContainer.innerHTML += `<div class="message user">${escapeHtml(texto)}</div>`;
+        inputEl.value = '';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
 
         inputEl.disabled = true;
-        btnEl.disabled = true;
-        btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el servidor...</span>';
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="spinner"></span>';
+
+        // 2. Agregar indicador temporal de escritura del asistente
+        const loadingId = 'loading-' + Date.now();
+        chatContainer.innerHTML += `<div id="${loadingId}" class="message assistant"><span class="spinner" style="border-color: var(--primary); border-bottom-color: transparent;"></span> Pensando respuesta...</div>`;
+        chatContainer.scrollTop = chatContainer.scrollHeight;
 
         try {
-            const response = await fetch(`${BACKEND_URL}/api/buscar`, {
+            const response = await fetch(`${BACKEND_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: query })
+                body: JSON.stringify({
+                    history: chatHistory,
+                    prompt: texto
+                })
             });
 
             const data = await response.json();
+            
+            // Remover indicador de carga
+            document.getElementById(loadingId).remove();
 
             if (!response.ok) {
-                // Muestra el detalle exacto enviado por el servidor o FastAPI
-                const mensajeError = data.detail || 'Error en la respuesta del servidor.';
-                outputEl.innerHTML = `<span style="color: #dc2626; font-weight: 600;">⚠️ Error ${response.status}: ${mensajeError}</span>`;
-            } else {
-                outputEl.innerHTML = marked.parse(data.respuesta);
+                throw new Error(data.detail || 'Error en el servidor');
             }
+
+            // 3. Mostrar respuesta del asistente renderizada en Markdown
+            const respuestaMarkdown = marked.parse(data.respuesta);
+            chatContainer.innerHTML += `<div class="message assistant">${respuestaMarkdown}</div>`;
+
+            // 4. Guardar en el historial de la sesión para mantener la memoria
+            chatHistory.push({ role: "user", content: texto });
+            chatHistory.push({ role: "model", content: data.respuesta });
+
         } catch (error) {
-            outputEl.innerHTML = `<span style="color: #dc2626; font-weight: 600;">⚠️ Error de conexión: ${error.message}. Verificá tu red o si el servidor está inactivo.</span>`;
+            document.getElementById(loadingId).remove();
+            chatContainer.innerHTML += `<div class="message assistant" style="color: #dc2626; font-weight: 600;">⚠️ Error: ${error.message}</div>`;
         } finally {
             inputEl.disabled = false;
-            btnEl.disabled = false;
-            btnEl.innerHTML = 'Buscar';
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = 'Enviar';
             inputEl.focus();
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 </script>
 </body>
