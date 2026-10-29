@@ -32,7 +32,7 @@ class ChatRequest(BaseModel):
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail="Falta la API Key en el servidor.")
+        raise HTTPException(status_code=500, detail="Falta configurar la API Key en el servidor de Render.")
     
     try:
         model = genai.GenerativeModel(
@@ -41,8 +41,13 @@ async def chat(request: ChatRequest):
         )
         
         response = model.generate_content(request.prompt)
+        
+        if not response or not response.text:
+            raise HTTPException(status_code=500, detail="Gemini devolvió una respuesta vacía.")
+            
         return {"respuesta": response.text}
         
     except Exception as e:
-        error_msg = f"Error en IA: {str(e)}"
-        raise HTTPException(status_code=500, detail=error_msg)
+        # Esto atrapará cualquier error exacto de la API de Google y lo mostrará claramente
+        error_detallado = str(e)
+        raise HTTPException(status_code=500, detail=f"Error interno de IA: {error_detallado}")
