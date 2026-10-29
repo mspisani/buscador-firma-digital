@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador Especializado - Firma Digital</title>
-    <!-- CORREGIDO: Enlace completo a la librería Marked para renderizar Markdown -->
+    <!-- LIBRERÍA CORREGIDA: Enlace HTTPS real para procesar Markdown -->
     <script src="https://jsdelivr.net"></script>
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f4f6f9; padding: 20px; display: flex; justify-content: center; }
@@ -38,8 +38,7 @@
 </div>
 
 <script>
-    // CORREGIDO: Tu dirección pública real y exacta de Render
-    const BACKEND_URL = "https://buscador-firma-digital.onrender.com";
+    const BACKEND_URL = "https://onrender.com";
 
     async function enviarConsulta() {
         const inputEl = document.getElementById('userInput');
@@ -51,7 +50,7 @@
         inputEl.disabled = true;
         btnEl.disabled = true;
         btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el motor de firma digital en la nube...</span>';
+        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el motor en la nube...</span>';
         
         try {
             const response = await fetch(`${BACKEND_URL}/api/buscar`, {
