@@ -14,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configurar la API Key con la librería oficial
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
@@ -39,9 +38,15 @@ async def buscar(request: QueryRequest):
         raise HTTPException(status_code=500, detail="Falta la API Key en el servidor de Render.")
     
     try:
-        # La librería oficial selecciona automáticamente el modelo compatible disponible
+        # Buscamos de forma automática el primer modelo funcional compatible con generación de contenido
+        modelo_disponible = "gemini-pro"
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                modelo_disponible = m.name
+                break
+
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name=modelo_disponible,
             system_instruction=SYSTEM_PROMPT
         )
         
