@@ -69,7 +69,7 @@
         inputEl.disabled = true;
         btnEl.disabled = true;
         btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el servidor (si estuvo inactivo, puede demorar unos segundos)...</span>';
+        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el servidor en Render (si estuvo inactivo, puede tardar hasta 40 segundos)...</span>';
 
         try {
             const response = await fetch(`${BACKEND_URL}/api/buscar`, {
@@ -78,11 +78,11 @@
                 body: JSON.stringify({ prompt: query })
             });
 
-            if (!response.ok) throw new Error('Error en el servidor');
+            if (!response.ok) throw new Error('Error en la comunicación con el backend.');
             const data = await response.json();
             outputEl.innerHTML = marked.parse(data.respuesta);
         } catch (error) {
-            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ El servidor en Render se está despertando de su inactividad. Esperá 30 segundos y vuelve a hacer clic en Buscar.</span>';
+            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ El servidor en Render está iniciando. Por favor, reintentá tu búsqueda en 20 segundos.</span>';
         } finally {
             inputEl.disabled = false;
             btnEl.disabled = false;
