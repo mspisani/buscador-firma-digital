@@ -35,7 +35,6 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Falta la API Key en el servidor.")
     
     try:
-        # Usamos el modelo oficial de Gemini para una respuesta rápida y fluida
         model = genai.GenerativeModel(
             model_name="gemini-1.5-flash",
             system_instruction=SYSTEM_PROMPT
@@ -45,4 +44,5 @@ async def chat(request: ChatRequest):
         return {"respuesta": response.text}
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error en IA: {str(e)}") IA: {str(e)}")
+        error_msg = f"Error en IA: {str(e)}"
+        raise HTTPException(status_code=500, detail=error_msg)
