@@ -4,211 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador Especializado - Firma Digital</title>
-    <!-- Fuentes y Marked.js -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
     <style>
-        :root {
-            --primary: #0052cc;
-            --primary-hover: #003d99;
-            --bg-gradient: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%);
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --accent-bg: #f8fafc;
-        }
-
+        :root { --primary: #0052cc; --primary-hover: #003d99; --bg-gradient: linear-gradient(135deg, #f0f4f9 0%, #e2e8f0 100%); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background: var(--card-bg);
-            padding: 35px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
+        body { font-family: 'Inter', sans-serif; background: var(--bg-gradient); color: #1e293b; min-height: 100vh; padding: 40px 20px; display: flex; justify-content: center; align-items: flex-start; }
+        .container { width: 100%; max-width: 800px; background: #ffffff; padding: 35px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
         .header { text-align: center; margin-bottom: 28px; }
-        .header-icon { font-size: 36px; margin-bottom: 10px; display: inline-block; }
         h1 { font-size: 26px; font-weight: 700; color: #0f172a; }
-        p.subtitle { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
-
+        p.subtitle { font-size: 14px; color: #64748b; margin-top: 6px; }
         .search-box { display: flex; gap: 12px; margin-bottom: 20px; }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 14px 18px;
-            border: 1.5px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.12);
-        }
-
-        button.btn-search {
-            padding: 14px 28px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-
+        input[type="text"] { flex: 1; padding: 14px 18px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 15px; outline: none; }
+        input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0, 82, 204, 0.12); }
+        button.btn-search { padding: 14px 28px; background-color: var(--primary); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
         button.btn-search:hover { background-color: var(--primary-hover); }
-        button.btn-search:disabled { background-color: #94a3b8; cursor: not-allowed; }
-
         .quick-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 25px; align-items: center; }
-        .quick-tags span { font-size: 12px; font-weight: 600; color: var(--text-muted); }
-        .tag {
-            background-color: #f1f5f9;
-            color: #334155;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s;
-        }
+        .quick-tags span { font-size: 12px; font-weight: 600; color: #64748b; }
+        .tag { background-color: #f1f5f9; color: #334155; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #e2e8f0; }
         .tag:hover { background-color: #e2e8f0; color: var(--primary); }
-
-        .resultado-box {
-            background-color: var(--accent-bg);
-            border: 1px solid var(--border-color);
-            border-left: 5px solid var(--primary);
-            padding: 24px;
-            border-radius: 10px;
-            min-height: 120px;
-            line-height: 1.7;
-            font-size: 15px;
-        }
-
-        .resultado-box h2, .resultado-box h3 { color: #0f172a; margin-top: 15px; margin-bottom: 10px; font-size: 17px; }
-        .resultado-box ul, .resultado-box ol { padding-left: 20px; margin-bottom: 12px; }
-        .resultado-box a { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .resultado-box a:hover { text-decoration: underline; }
-
-        .status { color: var(--text-muted); display: flex; align-items: center; gap: 12px; font-style: italic; }
-        .spinner {
-            width: 18px; height: 18px;
-            border: 2px solid #ffffff;
-            border-bottom-color: transparent;
-            border-radius: 50%;
-            display: inline-block;
-            animation: rotation 0.8s linear infinite;
-        }
+        .resultado-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 5px solid var(--primary); padding: 24px; border-radius: 10px; min-height: 120px; line-height: 1.7; font-size: 15px; }
+        .status { color: #64748b; font-style: italic; }
+        .spinner { width: 16px; height: 16px; border: 2px solid #ffffff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 0.8s linear infinite; }
         .spinner-dark { border-color: var(--primary); border-bottom-color: transparent; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Estilos de Configuración de Key */
-        .key-settings {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 15px;
-        }
-        .btn-link {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 12px;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        .btn-link:hover { color: var(--primary); }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="header">
-        <span class="header-icon">🔑</span>
-        <h1>Asistente de Firma Digital Argentina</h1>
-        <p class="subtitle">Guías rápidas para configuración de Tokens USB, drivers y certificados.</p>
+        <h1>🔑 Asistente de Firma Digital Argentina</h1>
+        <p class="subtitle">Guías rápidas para configuración de Tokens USB y certificados.</p>
     </div>
-
     <div class="search-box">
         <input type="text" id="userInput" placeholder="Ej: ¿Cómo instalo el token ePass2003 en Windows?..." onkeydown="if(event.key === 'Enter') enviarConsulta()">
-        <button id="sendBtn" class="btn-search" onclick="enviarConsulta()">
-            <span id="btnText">Buscar</span>
-        </button>
+        <button id="sendBtn" class="btn-search" onclick="enviarConsulta()">Buscar</button>
     </div>
-
     <div class="quick-tags">
-        <span>Consultas frecuentes:</span>
+        <span>Frecuentes:</span>
         <div class="tag" onclick="usarSugerencia('Instalar ePass2003 en Windows')">🔌 Driver ePass2003</div>
         <div class="tag" onclick="usarSugerencia('Descargar drivers mToken CriptoID')">📥 mToken CriptoID</div>
         <div class="tag" onclick="usarSugerencia('Como importar certificados ONTI')">📜 Certificados ONTI</div>
-        <div class="tag" onclick="usarSugerencia('Drivers SafeNet Argentina')">🛡️ SafeNet</div>
     </div>
-
     <div id="output" class="resultado-box">
         <span class="status">Escribí tu consulta arriba o elegí una opción rápida para comenzar.</span>
-    </div>
-
-    <div class="key-settings">
-        <button class="btn-link" onclick="configurarApiKey()">⚙️ Configurar / Cambiar Gemini API Key</button>
     </div>
 </div>
 
 <script>
-    const SYSTEM_PROMPT = (
-        "Sos un asistente técnico ultra conciso optimizado exclusivamente para Firma Digital, Certificados y Tokens USB "
-        "(ePass2003, mToken criptoID, SafeNet, Athena) en Argentina. "
-        "REGLAS OBLIGATORIAS DE RESPUESTA:\n"
-        "1. Estructura: Sé directo. Usa subtítulos y diagramas de flujo lineales con emojis (ej: 🔌 -> 📥 -> ⚙️).\n"
-        "2. Jerarquía de Enlaces: Priorizá e invitá siempre a descargar desde los canales oficiales del Estado Nacional "
-        "(Argentina.gob.ar u ONTI). Ofrecé repositorios privados (como Encode S.A.) únicamente como alternativa secundaria.\n"
-        "3. Formato: Formateá todos los enlaces en Markdown puro [Texto](URL) para que sean hipervínculos azules.\n"
-        "4. No respondas nada fuera de este nicho cerrado."
-    );
-
-    function obtenerApiKey() {
-        let key = localStorage.getItem('GEMINI_API_KEY');
-        if (!key) {
-            key = prompt("Por favor, ingresá tu Gemini API Key para activar la búsqueda:");
-            if (key) {
-                key = key.trim();
-                localStorage.setItem('GEMINI_API_KEY', key);
-            }
-        }
-        return key;
-    }
-
-    function configurarApiKey() {
-        const nuevaKey = prompt("Ingresá tu nueva Gemini API Key:");
-        if (nuevaKey) {
-            localStorage.setItem('GEMINI_API_KEY', nuevaKey.trim());
-            alert("API Key guardada correctamente.");
-        }
-    }
+    const BACKEND_URL = "https://buscador-firma-digital.onrender.com";
 
     function usarSugerencia(texto) {
         document.getElementById('userInput').value = texto;
@@ -216,20 +60,36 @@
     }
 
     async function enviarConsulta() {
-        const apiKey = obtenerApiKey();
         const inputEl = document.getElementById('userInput');
         const outputEl = document.getElementById('output');
         const btnEl = document.getElementById('sendBtn');
         const query = inputEl.value.trim();
-
-        if (!apiKey) {
-            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ Se requiere una Gemini API Key para realizar la búsqueda.</span>';
-            return;
-        }
-        
         if (!query) return;
 
         inputEl.disabled = true;
         btnEl.disabled = true;
         btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Consultando directamente al motor de inteligencia artificial...
+        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el servidor (si estuvo inactivo, puede demorar unos segundos)...</span>';
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/buscar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: query })
+            });
+
+            if (!response.ok) throw new Error('Error en el servidor');
+            const data = await response.json();
+            outputEl.innerHTML = marked.parse(data.respuesta);
+        } catch (error) {
+            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ El servidor en Render se está despertando de su inactividad. Esperá 30 segundos y vuelve a hacer clic en Buscar.</span>';
+        } finally {
+            inputEl.disabled = false;
+            btnEl.disabled = false;
+            btnEl.innerHTML = 'Buscar';
+            inputEl.focus();
+        }
+    }
+</script>
+</body>
+</html>
