@@ -15,7 +15,8 @@ app.add_middleware(
 )
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+# Usamos gemini-pro para garantizar compatibilidad total con la API v1beta
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
 
 SYSTEM_PROMPT = (
     "Sos un asistente técnico ultra conciso optimizado exclusivamente para Firma Digital, Certificados y Tokens USB "
@@ -34,7 +35,7 @@ class QueryRequest(BaseModel):
 @app.post("/api/buscar")
 async def buscar(request: QueryRequest):
     if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail="La variable de entorno GEMINI_API_KEY no está configurada en Render.")
+        raise HTTPException(status_code=500, detail="Falta la API Key en el servidor de Render.")
     
     payload = {
         "contents": [{"role": "user", "parts": [{"text": f"{SYSTEM_PROMPT}\n\nConsulta del usuario: {request.prompt}"}]}]
