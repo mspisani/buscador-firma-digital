@@ -15,8 +15,8 @@ app.add_middleware(
 )
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-# Ruta corregida y oficial para gemini-1.5-flash en la API v1beta
-GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+# Usamos el modelo gemini-pro que tiene soporte universal en v1beta
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
 
 SYSTEM_PROMPT = (
     "Sos un asistente técnico ultra conciso optimizado exclusivamente para Firma Digital, Certificados y Tokens USB "
@@ -26,7 +26,7 @@ SYSTEM_PROMPT = (
     "2. Jerarquía de Enlaces: Priorizá e invitá siempre a descargar desde los canales oficiales del Estado Nacional "
     "(Argentina.gob.ar u ONTI).\n"
     "3. Formato: Formateá todos los enlaces en Markdown puro [Texto](URL).\n"
-    "4. Não respondas nada fora deste nicho."
+    "4. No respondas nada fuera de este nicho cerrado."
 )
 
 class QueryRequest(BaseModel):
@@ -35,7 +35,7 @@ class QueryRequest(BaseModel):
 @app.post("/api/buscar")
 async def buscar(request: QueryRequest):
     if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail="Falta la API Key en el servidor de Render.")
+        raise HTTPException(status_status=500, detail="Falta la API Key en el servidor de Render.")
     
     payload = {
         "contents": [{"role": "user", "parts": [{"text": f"{SYSTEM_PROMPT}\n\nConsulta del usuario: {request.prompt}"}]}]
