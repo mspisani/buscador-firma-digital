@@ -127,6 +127,22 @@
         }
         .spinner-dark { border-color: var(--primary); border-bottom-color: transparent; }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Estilos de Configuración de Key */
+        .key-settings {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .btn-link:hover { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -156,14 +172,13 @@
     <div id="output" class="resultado-box">
         <span class="status">Escribí tu consulta arriba o elegí una opción rápida para comenzar.</span>
     </div>
+
+    <div class="key-settings">
+        <button class="btn-link" onclick="configurarApiKey()">⚙️ Configurar / Cambiar Gemini API Key</button>
+    </div>
 </div>
 
 <script>
-    // ⚠️ COLOCA TU API KEY DE GEMINI AQUÍ ABAJO ENTRE LAS COMILLAS
-    const GEMINI_API_KEY = "PEGA_TU_API_KEY_DE_GEMINI_AQUI";
-    
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
     const SYSTEM_PROMPT = (
         "Sos un asistente técnico ultra conciso optimizado exclusivamente para Firma Digital, Certificados y Tokens USB "
         "(ePass2003, mToken criptoID, SafeNet, Athena) en Argentina. "
@@ -175,57 +190,46 @@
         "4. No respondas nada fuera de este nicho cerrado."
     );
 
+    function obtenerApiKey() {
+        let key = localStorage.getItem('GEMINI_API_KEY');
+        if (!key) {
+            key = prompt("Por favor, ingresá tu Gemini API Key para activar la búsqueda:");
+            if (key) {
+                key = key.trim();
+                localStorage.setItem('GEMINI_API_KEY', key);
+            }
+        }
+        return key;
+    }
+
+    function configurarApiKey() {
+        const nuevaKey = prompt("Ingresá tu nueva Gemini API Key:");
+        if (nuevaKey) {
+            localStorage.setItem('GEMINI_API_KEY', nuevaKey.trim());
+            alert("API Key guardada correctamente.");
+        }
+    }
+
     function usarSugerencia(texto) {
         document.getElementById('userInput').value = texto;
         enviarConsulta();
     }
 
     async function enviarConsulta() {
+        const apiKey = obtenerApiKey();
         const inputEl = document.getElementById('userInput');
         const outputEl = document.getElementById('output');
         const btnEl = document.getElementById('sendBtn');
         const query = inputEl.value.trim();
-        
-        if (!query) return;
-        if (GEMINI_API_KEY.includes("AQUI")) {
-            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ Por favor, configurá tu GEMINI_API_KEY dentro del código JavaScript de la página.</span>';
+
+        if (!apiKey) {
+            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ Se requiere una Gemini API Key para realizar la búsqueda.</span>';
             return;
         }
         
+        if (!query) return;
+
         inputEl.disabled = true;
         btnEl.disabled = true;
         btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Consultando directamente al motor de inteligencia artificial...</span>';
-        
-        const payload = {
-            contents: [{
-                role: "user",
-                parts: [{ text: `${SYSTEM_PROMPT}\n\nConsulta del usuario: ${query}` }]
-            }]
-        };
-
-        try {
-            const response = await fetch(GEMINI_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) throw new Error('Error en la comunicación con la API de Google.');
-
-            const data = await response.json();
-            const textoRespuesta = data.candidates[0].content.parts[0].text;
-            
-            outputEl.innerHTML = marked.parse(textoRespuesta);
-        } catch (error) {
-            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ Error al procesar la consulta. Verificá tu clave de API de Gemini.</span>';
-        } finally {
-            inputEl.disabled = false;
-            btnEl.disabled = false;
-            btnEl.innerHTML = 'Buscar';
-            inputEl.focus();
-        }
-    }
-</script>
-</body>
-</html>
+        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Consultando directamente al motor de inteligencia artificial...
