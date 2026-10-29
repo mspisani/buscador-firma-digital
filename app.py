@@ -59,3 +59,7 @@ async def chat(request: ChatRequest):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno de IA: {str(e)}")
+        return {"respuesta": response.text}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno de IA: {str(e)}")
