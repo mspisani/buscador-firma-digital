@@ -35,8 +35,9 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Falta configurar la API Key en el servidor de Render.")
     
     try:
+        # Usamos gemini-1.5-pro que está totalmente activo y habilitado en la API oficial
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-1.5-pro",
             system_instruction=SYSTEM_PROMPT
         )
         
@@ -48,6 +49,5 @@ async def chat(request: ChatRequest):
         return {"respuesta": response.text}
         
     except Exception as e:
-        # Esto atrapará cualquier error exacto de la API de Google y lo mostrará claramente
         error_detallado = str(e)
         raise HTTPException(status_code=500, detail=f"Error interno de IA: {error_detallado}")
