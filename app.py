@@ -7,16 +7,16 @@ import httpx
 
 app = FastAPI(title="Motor de Búsqueda - Firma Digital")
 
-# CORS abierto para permitir peticiones desde GitHub Pages
+# CORREGIDO Y AUDITADO: allow_credentials en False para evitar conflictos con allow_origins=["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configuración del Endpoint de Gemini con el modelo oficial
+# Configuración del Endpoint oficial de Gemini con el modelo gemini-1.5-flash
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
@@ -44,7 +44,7 @@ async def call_gemini_with_retry(user_prompt: str) -> str:
         "contents": [{"role": "user", "parts": [{"text": f"{SYSTEM_PROMPT}\n\nConsulta del usuario: {user_prompt}"}]}]
     }
     
-    # Timeout ampliado a 45 segundos para tolerar la latencia inicial de la IA
+    # Timeout ampliado a 45 segundos para tolerar la latencia inicial cuando Render despierta
     async with httpx.AsyncClient() as client:
         for attempt in range(attempts):
             try:
