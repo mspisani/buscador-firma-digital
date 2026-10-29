@@ -35,9 +35,18 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=500, detail="Falta configurar la API Key en el servidor de Render.")
     
     try:
-        # Usamos gemini-1.5-pro que está totalmente activo y habilitado en la API oficial
+        # Detectamos automáticamente qué modelo soporta generación de contenido con tu clave actual
+        modelo_activo = None
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                modelo_activo = m.name
+                break
+        
+        if not modelo_activo:
+            modelo_activo = "gemini-pro" # Fallback por seguridad
+
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-pro",
+            model_name=modelo_activo,
             system_instruction=SYSTEM_PROMPT
         )
         
@@ -49,5 +58,4 @@ async def chat(request: ChatRequest):
         return {"respuesta": response.text}
         
     except Exception as e:
-        error_detallado = str(e)
-        raise HTTPException(status_code=500, detail=f"Error interno de IA: {error_detallado}")
+        raise HTTPException(status_code=500, detail=f"Error interno de IA: {str(e)}")
