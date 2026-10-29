@@ -34,7 +34,7 @@ class QueryRequest(BaseModel):
 @app.post("/api/buscar")
 async def buscar(request: QueryRequest):
     if not GEMINI_API_KEY:
-        raise HTTPException(status_code=500, detail="Error crítico: La variable GEMINI_API_KEY no está configurada en Render.")
+        raise HTTPException(status_code=500, detail="La variable de entorno GEMINI_API_KEY no está configurada en Render.")
     
     payload = {
         "contents": [{"role": "user", "parts": [{"text": f"{SYSTEM_PROMPT}\n\nConsulta del usuario: {request.prompt}"}]}]
@@ -42,14 +42,15 @@ async def buscar(request: QueryRequest):
     
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(GEMINI_URL, json=payload, timeout=40.0)
-            
-            # Si Gemini rechaza la clave o hay un error de cuota, devolvemos el detalle exacto
-            if response.status_code != 200:
-                error_detalle = response.json().get("error", {}).get("message", "Error desconocido de la API de Gemini")
-                raise HTTPException(status_code=500, detail=f"Google API Error: {error_detalle}")
-                
+            response = await client.post(GEMINI_URL, json=payload, timeout=30.0)
             data = response.json()
+            
+            if response.status_code != 200:
+                msg = data.get("error", {}).get("message", "Error de API Gemini")
+                raise HTTPException(status_code=response.status_code, detail=f"Google Gemini Error: {msg}")
+                
             return {"respuesta": data["candidates"][0]["content"]["parts"][0]["text"]}
+        except HTTPException:
+            raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Excepción interna en servidor: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Excepción interna: {str(e)}")
