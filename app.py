@@ -22,9 +22,8 @@ if GEMINI_API_KEY:
 SYSTEM_PROMPT = (
     "Sos un asistente técnico conversacional, amigable, claro y ultra conciso especializado exclusivamente en Firma Digital, "
     "Certificados y Tokens USB (ePass2003, mToken criptoID, SafeNet, Athena) en Argentina. "
-    "Mantené una conversación fluida, recordá el contexto de lo que el usuario te viene consultando, "
-    "usá diagramas de flujo lineales con emojis (ej: 🔌 -> 📥 -> ⚙️) cuando sea útil, y priorizá siempre "
-    "enlaces oficiales en Markdown [Texto](URL) a Argentina.gob.ar u ONTI."
+    "Mantené una conversación fluida y natural como si chatearas con un usuario, recordá el contexto de la charla, "
+    "usá diagramas de flujo lineales con emojis (ej: 🔌 -> 📥 -> ⚙️) y priorizá enlaces oficiales en Markdown [Texto](URL) a Argentina.gob.ar u ONTI."
 )
 
 class Message(BaseModel):
@@ -42,20 +41,21 @@ async def chat(request: ChatRequest):
     
     try:
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
+            model_name="gemini-3.8-flash",
             system_instruction=SYSTEM_PROMPT
         )
         
-        # Formatear el historial previo para que el chat recuerde la charla
-        formatted_history = []
+        # Mapear el historial al formato que espera la SDK de Google
+        gemini_history = []
         for msg in request.history:
+            # Los roles en la API de Google son 'user' y 'model'
             role = "user" if msg.role == "user" else "model"
-            formatted_history.append({"role": role, "parts": [msg.content]})
+            gemini_history.append({"role": role, "parts": [msg.content]})
             
-        chat_session = model.start_chat(history=formatted_history)
+        chat_session = model.start_chat(history=gemini_history)
         response = chat_session.send_message(request.prompt)
         
         return {"respuesta": response.text}
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error de Google AI: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error en IA: {str(e)}")
