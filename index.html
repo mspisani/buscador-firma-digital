@@ -71,7 +71,7 @@
 
 <script>
     const BACKEND_URL = "https://buscador-firma-digital.onrender.com";
-    let chatHistory = []; // Almacena la memoria de la conversación
+    let chatHistory = [];
 
     function usarSugerencia(texto) {
         document.getElementById('userInput').value = texto;
@@ -86,7 +86,6 @@
 
         if (!texto) return;
 
-        // 1. Mostrar mensaje del usuario en la burbuja de chat
         chatContainer.innerHTML += `<div class="message user">${escapeHtml(texto)}</div>`;
         inputEl.value = '';
         chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -95,41 +94,49 @@
         sendBtn.disabled = true;
         sendBtn.innerHTML = '<span class="spinner"></span>';
 
-        // 2. Agregar indicador temporal de escritura del asistente
         const loadingId = 'loading-' + Date.now();
-        chatContainer.innerHTML += `<div id="${loadingId}" class="message assistant"><span class="spinner" style="border-color: var(--primary); border-bottom-color: transparent;"></span> Pensando respuesta...</div>`;
+        chatContainer.innerHTML += `<div id="${loadingId}" class="message assistant"><span class="spinner" style="border-color: var(--primary); border-bottom-color: transparent;"></span> Conectando con Gemini...</div>`;
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 60000);
+
             const response = await fetch(`${BACKEND_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     history: chatHistory,
                     prompt: texto
-                })
+                }),
+                signal: controller.signal
             });
 
+            clearTimeout(timeoutId);
             const data = await response.json();
             
-            // Remover indicador de carga
-            document.getElementById(loadingId).remove();
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
 
             if (!response.ok) {
                 throw new Error(data.detail || 'Error en el servidor');
             }
 
-            // 3. Mostrar respuesta del asistente renderizada en Markdown
             const respuestaMarkdown = marked.parse(data.respuesta);
             chatContainer.innerHTML += `<div class="message assistant">${respuestaMarkdown}</div>`;
 
-            // 4. Guardar en el historial de la sesión para mantener la memoria
             chatHistory.push({ role: "user", content: texto });
             chatHistory.push({ role: "model", content: data.respuesta });
 
         } catch (error) {
-            document.getElementById(loadingId).remove();
-            chatContainer.innerHTML += `<div class="message assistant" style="color: #dc2626; font-weight: 600;">⚠️ Error: ${error.message}</div>`;
+            const loadingEl = document.getElementById(loadingId);
+            if (loadingEl) loadingEl.remove();
+
+            let errorMessage = error.message;
+            if (error.name === 'AbortError') {
+                errorMessage = "El servidor tardó demasiado en responder. Vuelve a intentar en unos segundos.";
+            }
+            chatContainer.innerHTML += `<div class="message assistant" style="color: #dc2626; font-weight: 600;">⚠️ Error: ${errorMessage}</div>`;
         } finally {
             inputEl.disabled = false;
             sendBtn.disabled = false;
