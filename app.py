@@ -38,15 +38,9 @@ async def buscar(request: QueryRequest):
         raise HTTPException(status_code=500, detail="Falta la API Key en el servidor de Render.")
     
     try:
-        # Buscamos de forma automática el primer modelo funcional compatible con generación de contenido
-        modelo_disponible = "gemini-pro"
-        for m in genai.list_models():
-            if 'generateContent' in m.supported_generation_methods:
-                modelo_disponible = m.name
-                break
-
+        # Usamos exactamente el modelo requerido por tu cuenta de Google
         model = genai.GenerativeModel(
-            model_name=modelo_disponible,
+            model_name="gemini-3.8-flash",
             system_instruction=SYSTEM_PROMPT
         )
         
