@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador Especializado - Firma Digital</title>
-    <!-- LIBRERÍA CORREGIDA: Descarga HTTPS completa para procesar las respuestas de la IA -->
-    <script src="https://jsdelivr.net"></script>
+    <!-- Librería oficial y funcional de Marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body { font-family: -apple-system, sans-serif; background-color: #f4f6f9; padding: 20px; display: flex; justify-content: center; }
         .container { width: 100%; max-width: 750px; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -38,7 +38,8 @@
 </div>
 
 <script>
-    const BACKEND_URL = "https://onrender.com";
+    // ⚠️ REEMPLAZA ESTA URL CON LA URL REAL DE TU BACKEND EN RENDER (Ej: https://buscador-firma-digital.onrender.com)
+    const BACKEND_URL = "https://tu-app.onrender.com";
 
     async function enviarConsulta() {
         const inputEl = document.getElementById('userInput');
@@ -50,7 +51,7 @@
         inputEl.disabled = true;
         btnEl.disabled = true;
         btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el motor en la nube...</span>';
+        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el motor en la nube... (si Render está inactivo, puede demorar unos segundos)</span>';
         
         try {
             const response = await fetch(`${BACKEND_URL}/api/buscar`, {
@@ -62,7 +63,7 @@
             const data = await response.json();
             outputEl.innerHTML = marked.parse(data.respuesta);
         } catch (error) {
-            outputEl.innerHTML = '<span style="color: #cc0000; font-weight: bold;">⚠️ Error de red o sobrecarga en la API. Por favor, reintentá la consulta en unos instantes.</span>';
+            outputEl.innerHTML = '<span style="color: #cc0000; font-weight: bold;">⚠️ Error de red o sobrecarga en la API. Recordá que si tu servidor en Render estuvo inactivo, la primera consulta puede tardar hasta 50 segundos en responder. Reintentá en un momento.</span>';
         } finally {
             inputEl.disabled = false;
             btnEl.disabled = false;
