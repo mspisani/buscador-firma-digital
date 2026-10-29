@@ -69,7 +69,7 @@
         inputEl.disabled = true;
         btnEl.disabled = true;
         btnEl.innerHTML = '<span class="spinner"></span> Buscando...';
-        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el servidor en Render (si estuvo inactivo, puede tardar hasta 40 segundos)...</span>';
+        outputEl.innerHTML = '<span class="status"><span class="spinner spinner-dark"></span> Conectando con el servidor...</span>';
 
         try {
             const response = await fetch(`${BACKEND_URL}/api/buscar`, {
@@ -78,11 +78,17 @@
                 body: JSON.stringify({ prompt: query })
             });
 
-            if (!response.ok) throw new Error('Error en la comunicación con el backend.');
             const data = await response.json();
-            outputEl.innerHTML = marked.parse(data.respuesta);
+
+            if (!response.ok) {
+                // Muestra el detalle exacto enviado por el servidor o FastAPI
+                const mensajeError = data.detail || 'Error en la respuesta del servidor.';
+                outputEl.innerHTML = `<span style="color: #dc2626; font-weight: 600;">⚠️ Error ${response.status}: ${mensajeError}</span>`;
+            } else {
+                outputEl.innerHTML = marked.parse(data.respuesta);
+            }
         } catch (error) {
-            outputEl.innerHTML = '<span style="color: #dc2626; font-weight: 600;">⚠️ El servidor en Render está iniciando. Por favor, reintentá tu búsqueda en 20 segundos.</span>';
+            outputEl.innerHTML = `<span style="color: #dc2626; font-weight: 600;">⚠️ Error de conexión: ${error.message}. Verificá tu red o si el servidor está inactivo.</span>`;
         } finally {
             inputEl.disabled = false;
             btnEl.disabled = false;
